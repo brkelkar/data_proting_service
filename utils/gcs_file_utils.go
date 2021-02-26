@@ -30,7 +30,6 @@ type GcsFile struct {
 
 //HandleGCSEvent  parse file name and set all required attributes for the file
 func (g *GcsFile) HandleGCSEvent(ctx context.Context, e models.GCSEvent) *GcsFile {
-
 	var gcsObj GcsBucketClient
 	g.GcsClient = gcsObj.InitClient(ctx).SetBucketName(e.Bucket).SetNewReader(e.Name)
 
@@ -42,15 +41,9 @@ func (g *GcsFile) HandleGCSEvent(ctx context.Context, e models.GCSEvent) *GcsFil
 	g.FileName = e.Name
 	g.BucketName = e.Bucket
 	fileSplitSlice := strings.Split(e.Name, "/")
-	if len(fileSplitSlice) == 3 {
-		g.DistributorCode = fileSplitSlice[1]
-	} else {
-
-		log.Print("File is not correct format")
-	}
-
+	g.DistributorCode = fileSplitSlice[2]
 	g.LastUpdateTime = e.Updated
-	g.Source = fileSplitSlice[0]
+	g.Source = fileSplitSlice[1]
 	g.ProcessingTime = e.Updated.Format("2006-01-02")
 	return g
 }

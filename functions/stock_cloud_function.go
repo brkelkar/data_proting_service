@@ -4,17 +4,13 @@ import (
 	"bufio"
 	"data_porting_service/models"
 	"data_porting_service/utils"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"strconv"
 	"strings"
-	"time"
 
 	cr "github.com/brkelkar/common_utils/configreader"
-	//bt "github.com/brkelkar/common_utils/batch"
-	//db "github.com/brkelkar/common_utils/databases"
 )
 
 //StockAttr used for update Stock file in database
@@ -40,7 +36,6 @@ func (s *StockAttr) StockCloudFunction(g *utils.GcsFile, cfg cr.Config) (err err
 	s.stockInit(cfg)
 	var reader *bufio.Reader
 	reader = bufio.NewReader(g.GcsClient.GetReader())
-
 	flag := 1
 	var stock []models.Stocks
 	productMap := make(map[string]models.Stocks)
@@ -86,7 +81,6 @@ func (s *StockAttr) StockCloudFunction(g *utils.GcsFile, cfg cr.Config) (err err
 		flag = 0
 
 		if err == io.EOF {
-			g.GcsClient.Close()
 			break
 		}
 	}
@@ -95,12 +89,9 @@ func (s *StockAttr) StockCloudFunction(g *utils.GcsFile, cfg cr.Config) (err err
 		stock = append(stock, val)
 	}
 	recordCount := len(stock)
-	jsonValue, _ := json.Marshal(stock)
-	fmt.Println(recordCount)
-
 	if recordCount > 0 {
-		time.Sleep(20 * time.Millisecond)
-		err = utils.WriteToSyncService(URLPath, jsonValue)
+		//jsonValue, _ := json.Marshal(stock)
+		//err = utils.WriteToSyncService(URLPath, jsonValue)
 		if err != nil {
 			//var d db.DbObj
 			//dbPtr, err := d.GetConnection("smartdb", cfg)
