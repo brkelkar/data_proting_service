@@ -1,6 +1,6 @@
 # Server configurations
 server:
-  host: "localhost"
+  host: "app.awacscloud.tech"
   port: 8088
 
 

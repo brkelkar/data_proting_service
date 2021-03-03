@@ -6,13 +6,12 @@ import (
 	"data_porting_service/models"
 	"data_porting_service/utils"
 	"encoding/json"
-	"fmt"
-	"log"
+	"sync"
 	"time"
 
 	"cloud.google.com/go/pubsub"
 	cr "github.com/brkelkar/common_utils/configreader"
-	"github.com/brkelkar/common_utils/logger"
+	log "github.com/brkelkar/common_utils/logger"
 )
 
 type BukectStruct struct {
@@ -28,78 +27,57 @@ var (
 	err           error
 	cfg           cr.Config
 	gcsFileAttr   utils.GcsFile
-	//gcsObj      gc.GcsBucketClient
+	awacsSubNames []string
+	projectID     string
+	maxGoroutines int64
 )
 
+func init() {
+	awacsSubNames = []string{"awacsstock-sub", "awacscustomermaster-sub", "awacsoutstanding-sub", "awacsproductmaster-sub", "awacsinvoice-sub"}
+	projectID = "awacs-dev"
+	maxGoroutines = 10
+	cfg.ReadGcsFile("gs://awacs_config/cloud_function_config.yml")
+}
+
 func main() {
-	projectID := "awacs-dev"
-	cfg.ReadFile("config.yml")
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		logger.Error("pubsub.NewClient: %v", err)
+		log.Error("Error while recieving Message: %v", err)
 	}
 	defer client.Close()
-	maxGoroutines := 5
-	substock := client.Subscription("awacsstock")
-	subcustomer := client.Subscription("awacscustomermaster-sub")
-	subproduct := client.Subscription("awacsproductmaster-sub")
-	subinvoice := client.Subscription("awacsinvoice")
-	suboutstanding := client.Subscription("awacsoutstanding-sub")
+
+	var awacsSubscriptions []*pubsub.Subscription
+
+	for _, name := range awacsSubNames {
+		awacsSubscriptions = append(awacsSubscriptions, client.Subscription(name))
+	}
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	// Create a channel to handle messages to as they come in.
 	cm := make(chan *pubsub.Message)
-	cnt := 1
+
 	defer close(cm)
 	guard := make(chan struct{}, maxGoroutines)
 
-	go func() {
-		// Receive blocks until the context is cancelled or an error occurs.
-		err = substock.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-			cm <- msg
-		})
-	}()
-
-	go func() {
-		err = subcustomer.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-			cm <- msg
-		})
-	}()
-
-	go func() {
-		err = subproduct.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-			cm <- msg
-		})
-	}()
-
-	go func() {
-		err = subinvoice.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-			cm <- msg
-		})
-	}()
-
-	go func() {
-		err = suboutstanding.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-			cm <- msg
-		})
-	}()
+	for _, sub := range awacsSubscriptions {
+		go func(sub *pubsub.Subscription) {
+			// Receive blocks until the context is cancelled or an error occurs.
+			err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+				cm <- msg
+			})
+		}(sub)
+	}
 
 	for msg := range cm {
 		guard <- struct{}{} // would block if guard channel is already filled
-		//time.Sleep(5 * time.Millisecond)
 		go func(ctx context.Context, msg pubsub.Message) {
 			worker(ctx, msg)
 			msg.Ack()
 			<-guard
 		}(ctx, *msg)
-		cnt++
-	}
-
-	if err != nil {
-		logger.Error("pubsub.NewClient: %v", err)
-		log.Fatal("Error while recieving Message")
 	}
 }
 
@@ -111,37 +89,26 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	e.Name = bucketDetails.Name
 	e.Updated = bucketDetails.Updated
 	e.Size = bucketDetails.Size
-	g := gcsFileAttr.HandleGCSEvent(ctx, e)
-	if !g.GcsClient.GetLastStatus() {
-		log.Print("Error while reading file")
-		g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balaawacstest")
-		return
-	}
+	var mu sync.Mutex
+	mu.Lock()
+	g := *gcsFileAttr.HandleGCSEvent(ctx, e)
+	mu.Unlock()
 
-	switch {
-	case bucketDetails.Bucket == "awacsstock":
-		fmt.Println(bucketDetails.Bucket)
+	switch bucketDetails.Bucket {
+	case "awacsstock":
 		var stockObj functions.StockAttr
-		if len(msg.Data) > 0 {
-			stockObj.StockCloudFunction(g, cfg)
-		}
-	case bucketDetails.Bucket == "awacsinvoice":
-		fmt.Println(bucketDetails.Bucket)
+		stockObj.StockCloudFunction(g, cfg)
+	case "awacsinvoice":
 		var invoiceAttr functions.InvoiceAttr
-		if len(msg.Data) > 0 {
-			invoiceAttr.InvoiceCloudFunction(g, cfg)
-		}
-	case bucketDetails.Bucket == "awacscustomermaster":
-		fmt.Println(bucketDetails.Bucket)
+		invoiceAttr.InvoiceCloudFunction(g, cfg)
+	case "awacscustomermaster":
 		var customerMasterAttar functions.CustomerMasterAttar
-		if len(msg.Data) > 0 {
-			customerMasterAttar.CustomerMasterCloudFunction(g, cfg)
-		}
-	case bucketDetails.Bucket == "awacsproductmaster":
-		fmt.Println(bucketDetails.Bucket)
+		customerMasterAttar.CustomerMasterCloudFunction(g, cfg)
+	case "awacsproductmaster":
+		var ProductmasterAttar functions.ProductMasterAttar
+		ProductmasterAttar.ProductMasterCloudFunction(g, cfg)
+	case "awacsoutstanding":
 		var OutstandingAttar functions.OutstandingAttar
-		if len(msg.Data) > 0 {
-			OutstandingAttar.OutstandingCloudFunction(g, cfg)
-		}
+		OutstandingAttar.OutstandingCloudFunction(g, cfg)
 	}
 }

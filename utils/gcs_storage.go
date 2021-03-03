@@ -73,6 +73,7 @@ func (g *GcsBucketClient) MoveObject(srcObject string, destObject string, destBu
 	if _, err := dst.CopierFrom(src).Run(g.ctx); err != nil {
 		fmt.Println(err)
 		g.errorf("failed to get default GCS bucket name: %v", err)
+		g.status = false
 	} else {
 		g.status = true
 
@@ -80,6 +81,7 @@ func (g *GcsBucketClient) MoveObject(srcObject string, destObject string, destBu
 	if err := src.Delete(g.ctx); err != nil {
 		fmt.Println(err)
 		g.errorf("failed to get default GCS bucket name: %v", err)
+		g.status = false
 	} else {
 		g.status = true
 

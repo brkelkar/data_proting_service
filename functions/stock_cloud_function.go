@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"data_porting_service/models"
 	"data_porting_service/utils"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	cr "github.com/brkelkar/common_utils/configreader"
 )
@@ -26,11 +29,12 @@ func (s *StockAttr) stockInit(cfg cr.Config) {
 		s.cAttr.colMap[val] = -1
 	}
 	apiPath = "/api/stocks"
-	URLPath = utils.GetHostURL(cfg) + ":8088" + apiPath
+	URLPath = utils.GetHostURL(cfg) + apiPath
 }
 
 //StockCloudFunction used to load stock file to database
-func (s *StockAttr) StockCloudFunction(g *utils.GcsFile, cfg cr.Config) (err error) {
+func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err error) {
+	startTime := time.Now()
 	log.Printf("Starting stock file upload for :%v", g.FilePath)
 	g.FileType = "S"
 	s.stockInit(cfg)
@@ -41,7 +45,6 @@ func (s *StockAttr) StockCloudFunction(g *utils.GcsFile, cfg cr.Config) (err err
 	productMap := make(map[string]models.Stocks)
 
 	for {
-		//fileRow, err := reader.Read()
 		line, err := reader.ReadString('\n')
 		if err != nil && err != io.EOF {
 			fmt.Println(err)
@@ -90,25 +93,29 @@ func (s *StockAttr) StockCloudFunction(g *utils.GcsFile, cfg cr.Config) (err err
 	}
 	recordCount := len(stock)
 	if recordCount > 0 {
-		//jsonValue, _ := json.Marshal(stock)
-		//err = utils.WriteToSyncService(URLPath, jsonValue)
-		if err != nil {
-			//var d db.DbObj
-			//dbPtr, err := d.GetConnection("smartdb", cfg)
-			if err != nil {
-				log.Print(err)
-				g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balaawacstest")
-				log.Println("Porting Error :" + g.FileName)
-				g.LogFileDetails(false)
-				return err
-			}
+		//time.Sleep(2 * time.Second)
+		jsonValue, _ := json.Marshal(stock)
 
+		err = utils.WriteToSyncService(URLPath, jsonValue)
+		if err != nil {
+
+			log.Print(err)
+			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")
+			log.Println("Porting Error :" + g.FileName)
+			g.LogFileDetails(false)
+			return err
 		}
+
 	}
+	var mu sync.Mutex
+	mu.Lock()
 	// If either of the loading is successful move file to ported
 	g.GcsClient.MoveObject(g.FileName, "ported/"+g.FileName, "balatestawacs")
+	log.Println("Porting Done :" + g.FileName)
+	mu.Unlock()
+	g.TimeDiffrence = int64(time.Now().Sub(startTime) / 1000000)
 	g.Records = recordCount
 	g.LogFileDetails(true)
-	log.Println("Porting Done :" + g.FileName)
+
 	return nil
 }

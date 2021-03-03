@@ -2,6 +2,7 @@ package functions
 
 var (
 	apiPath string
+	//URLPath Api url
 	URLPath string
 )
 
