@@ -40,7 +40,6 @@ func init() {
 	projectID = "awacs-dev"
 	maxGoroutines = 10
 	cfg.ReadGcsFile("gs://awacs_config/cloud_function_config.yml")
-	cfg.Server = "localhost"
 	fiveMB = 5 * 1024 * 1024
 }
 
