@@ -6,6 +6,7 @@ import (
 	"data_porting_service/models"
 	"data_porting_service/utils"
 	"encoding/json"
+	"strconv"
 	"sync"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	log "github.com/brkelkar/common_utils/logger"
 )
 
+//BukectStruct parse data from pubsub
 type BukectStruct struct {
 	ID      string    `json:"id"`
 	Name    string    `json:"name"`
@@ -30,6 +32,7 @@ var (
 	awacsSubNames []string
 	projectID     string
 	maxGoroutines int64
+	fiveMB        int64
 )
 
 func init() {
@@ -37,6 +40,7 @@ func init() {
 	projectID = "awacs-dev"
 	maxGoroutines = 10
 	cfg.ReadGcsFile("gs://awacs_config/cloud_function_config.yml")
+	fiveMB = 5 * 1024 * 1024
 }
 
 func main() {
@@ -89,6 +93,10 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	e.Name = bucketDetails.Name
 	e.Updated = bucketDetails.Updated
 	e.Size = bucketDetails.Size
+	bucketSize, err := strconv.ParseInt(bucketDetails.Size, 10, 64)
+	if err == nil && bucketSize > fiveMB {
+		msg.Ack()
+	}
 	var mu sync.Mutex
 	mu.Lock()
 	g := *gcsFileAttr.HandleGCSEvent(ctx, e)

@@ -2,7 +2,6 @@ package functions
 
 import (
 	"bufio"
-	"encoding/json"
 	"io"
 	"log"
 	"strconv"
@@ -48,7 +47,7 @@ func (o *ProductMasterAttar) ProductMasterCloudFunction(g utils.GcsFile, cfg cr.
 	reader = bufio.NewReader(g.GcsClient.GetReader())
 
 	flag := 1
-	var Productmaster []models.ProductMaster
+	var Productmaster []interface{}
 
 	for {
 		line, err := reader.ReadString('\n')
@@ -134,15 +133,14 @@ func (o *ProductMasterAttar) ProductMasterCloudFunction(g utils.GcsFile, cfg cr.
 	recordCount := len(Productmaster)
 
 	if recordCount > 0 {
-		jsonValue, _ := json.Marshal(Productmaster)
-		err = utils.WriteToSyncService(URLPath, jsonValue)
+		//jsonValue, _ := json.Marshal(Productmaster)
+		err = utils.WriteToSyncService(URLPath, Productmaster,20000)
 		if err != nil {
 			log.Print(err)
 			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")
 			log.Println("Porting Error :" + g.FileName)
 			g.LogFileDetails(false)
 			return err
-
 		}
 	}
 	var mu sync.Mutex

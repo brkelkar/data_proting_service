@@ -29,7 +29,7 @@ type InvoiceAttr struct {
 
 func (i *InvoiceAttr) initInvoice(cfg cr.Config) {
 	i.cAttr.colMap = make(map[string]int)
-	i.cAttr.colName = []string{"USERID", "BILLNUMBER", "BILLDATE", "CHALLANNUMBER", "CHALLANDATE", "BUYERCODE", "REASON", "COMPANYNAME", "UPC", "PRODUCTCODE", "MRP", "BATCH", "EXPIRY", "QUANTITY", "FREEQUANTITY", "RATE", "AMOUNT", "DISCOUNT", "DISCOUNTAMOUNT", "ADDLSCHEME", "ADDLSCHEMEAMOUNT", "ADDLDISCOUNT", "ADDLDISCOUNTAMOUNT", "DEDUCTABLEBEFOREDISCOUNT", "MRPINCLUSIVETAX", "VATAPPLICATION", "VAT", "ADDLTAX", "CST", "SGST", "CGST", "IGST", "BASESCHEMEQUANTITY", "BASESCHEMEFREEQUANTITY", "NETINVOICEAMOUNT", "PAYMENTDUEDATE", "REMARKS", "SAVEDATE", "SYNDATE", "SYNCDATE", "PRODUCTNAME", "PRODUCTPACK", "EMONTH", "EXPMONTH", "CESS", "CESSAMOUNT", "SGSTAMOUNT", "CGSTAMOUNT", "IGSTAMOUNT", "TAXABLEAMOUNT", "HSN", "BARCODE", "ORDERNUMBER", "ORDERDATE", "LASTTRANSACTIONDATE"}
+	i.cAttr.colName = []string{"USERID", "BILLNUMBER", "BILLDATE", "CHALLANNUMBER", "CHALLANDATE", "BUYERCODE", "REASON", "COMPANYNAME", "UPC", "PRODUCTCODE", "MRP", "BATCH", "EXPIRY", "QUANTITY", "FREEQUANTITY", "RATE", "AMOUNT", "DISCOUNT", "DISCOUNTAMOUNT", "ADDLSCHEME", "ADDLSCHEMEAMOUNT", "ADDLDISCOUNT", "ADDLDISCOUNTAMOUNT", "DEDUCTABLEBEFOREDISCOUNT", "MRPINCLUSIVETAX", "VATAPPLICATION", "VAT", "ADDLTAX", "CST", "SGST", "CGST", "IGST", "BASESCHEMEQUANTITY", "BASESCHEMEFREEQUANTITY", "NETINVOICEAMOUNT", "PAYMENTDUEDATE", "REMARKS", "SAVEDATE", "SYNDATE", "SYNCDATE", "PRODUCTNAME", "PRODUCTPACK", "EMONTH", "EXPMONTH", "CESS", "CESSAMOUNT", "SGSTAMOUNT", "CGSTAMOUNT", "IGSTAMOUNT", "TAXABLEAMOUNT", "HSN", "ORDERNUMBER", "ORDERDATE", "LASTTRANSACTIONDATE"}
 	for _, val := range i.cAttr.colName {
 		i.cAttr.colMap[val] = -1
 	}
@@ -56,7 +56,8 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 
 	flag := 1
 
-	var Invoice []models.Invoice
+	//var Invoice []models.Invoice
+	var Invoice []interface{}
 	var reader *bufio.Reader
 	//Distributor with vendor code 113 sents files with multiline records
 	//This code will handle these type of files by replaceing \n \r with
@@ -194,8 +195,8 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 					tempInvoice.OrderNumber = val
 				case i.cAttr.colMap["ORDERDATE"]:
 					tempInvoice.OrderDate, _ = utils.ConvertDate(val)
-				case i.cAttr.colMap["BARCODE"]:
-					tempInvoice.Barcode = val
+					// case i.cAttr.colMap["BARCODE"]:
+					// 	tempInvoice.Barcode = val
 				}
 			}
 		}
@@ -215,8 +216,8 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 	//Got final record to write
 	recordCount := len(Invoice)
 	if recordCount > 0 {
-		jsonValue, _ := json.Marshal(Invoice)
-		err := utils.WriteToSyncService(URLPath, jsonValue)
+		//jsonValue, _ := json.Marshal(Invoice)
+		err := utils.WriteToSyncService(URLPath, Invoice, 15000)
 		if err != nil {
 			log.Println(err)
 			g.GcsClient.MoveObject(g.FileName, g.FileName, "awacserrorinvoice")

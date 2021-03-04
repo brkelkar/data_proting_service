@@ -2,7 +2,6 @@ package functions
 
 import (
 	"bufio"
-	"encoding/json"
 	"io"
 	"log"
 	"strings"
@@ -43,7 +42,7 @@ func (o *CustomerMasterAttar) CustomerMasterCloudFunction(g utils.GcsFile, cfg c
 	var reader *bufio.Reader
 	reader = bufio.NewReader(g.GcsClient.GetReader())
 	flag := 1
-	var Customermaster []models.CustomerMaster
+	var Customermaster []interface{}
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil && err != io.EOF {
@@ -128,8 +127,8 @@ func (o *CustomerMasterAttar) CustomerMasterCloudFunction(g utils.GcsFile, cfg c
 	}
 	recordCount := len(Customermaster)
 	if recordCount > 0 {
-		jsonValue, _ := json.Marshal(Customermaster)
-		err = utils.WriteToSyncService(URLPath, jsonValue)
+		//jsonValue, _ := json.Marshal(Customermaster)
+		err = utils.WriteToSyncService(URLPath, Customermaster,20000)
 		if err != nil {
 			log.Print(err)
 			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")

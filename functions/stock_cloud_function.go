@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"data_porting_service/models"
 	"data_porting_service/utils"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -41,7 +40,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	var reader *bufio.Reader
 	reader = bufio.NewReader(g.GcsClient.GetReader())
 	flag := 1
-	var stock []models.Stocks
+	var stock []interface{}
 	productMap := make(map[string]models.Stocks)
 
 	for {
@@ -93,10 +92,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	}
 	recordCount := len(stock)
 	if recordCount > 0 {
-		//time.Sleep(2 * time.Second)
-		jsonValue, _ := json.Marshal(stock)
-
-		err = utils.WriteToSyncService(URLPath, jsonValue)
+		err = utils.WriteToSyncService(URLPath, stock,20000)
 		if err != nil {
 
 			log.Print(err)

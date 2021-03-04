@@ -2,7 +2,6 @@ package functions
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -40,12 +39,12 @@ func (o *OutstandingAttar) OutstandingCloudFunction(g utils.GcsFile, cfg cr.Conf
 	log.Printf("Starting outstanding file upload for :%v/%v ", g.FilePath, g.FileName)
 	o.initOutstanding(cfg)
 	g.FileType = "O"
-	// reader := csv.NewReader(g.GcsClient.GetReader())
-	// reader.Comma = '|'
+
 	var reader *bufio.Reader
 	reader = bufio.NewReader(g.GcsClient.GetReader())
 	flag := 1
 	var Outstanding []models.Outstanding
+	var OutstandingPayload []interface{}
 
 	for {
 		//fileRow, err := reader.Read()
@@ -123,10 +122,13 @@ func (o *OutstandingAttar) OutstandingCloudFunction(g utils.GcsFile, cfg cr.Conf
 		customerOutstanding = append(customerOutstanding, val)
 	}
 
-	recordCount := len(customerOutstanding)
+	for _, val := range customerOutstanding {
+		OutstandingPayload = append(OutstandingPayload, val)
+	}
+
+	recordCount := len(OutstandingPayload)
 	if recordCount > 0 {
-		jsonValue, _ := json.Marshal(customerOutstanding)
-		err = utils.WriteToSyncService(URLPath, jsonValue)
+		err = utils.WriteToSyncService(URLPath, OutstandingPayload,20000)
 		if err != nil {
 			log.Print(err)
 			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")
