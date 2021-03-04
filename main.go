@@ -39,7 +39,7 @@ func init() {
 	awacsSubNames = []string{"awacsstock-sub", "awacscustomermaster-sub", "awacsoutstanding-sub", "awacsproductmaster-sub", "awacsinvoice-sub"}
 	projectID = "awacs-dev"
 	maxGoroutines = 10
-	cfg.ReadGcsFile("gs://awacs_config/cloud_function_config.yml")
+	//cfg.ReadGcsFile("gs://awacs_config/cloud_function_config.yml")
 	fiveMB = 5 * 1024 * 1024
 }
 
