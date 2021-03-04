@@ -65,7 +65,7 @@ func main() {
 
 	defer close(cm)
 	guard := make(chan struct{}, maxGoroutines)
-
+	log.Info("Starting go routines")
 	for _, sub := range awacsSubscriptions {
 		go func(sub *pubsub.Subscription) {
 			// Receive blocks until the context is cancelled or an error occurs.
@@ -74,10 +74,11 @@ func main() {
 			})
 		}(sub)
 	}
-
+	log.Info("Starting go Message reader")
 	for msg := range cm {
 		guard <- struct{}{} // would block if guard channel is already filled
 		go func(ctx context.Context, msg pubsub.Message) {
+			log.Info("Calling worker")
 			worker(ctx, msg)
 			msg.Ack()
 			<-guard
