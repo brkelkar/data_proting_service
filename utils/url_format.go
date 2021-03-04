@@ -6,7 +6,6 @@ import (
 
 //GetHostURL return Host URL using config
 func GetHostURL(cfg cr.Config) (URL string) {
-	URL = "http://" + cfg.Server.Host
+	URL = "http://localhost:8088/"
 	return
 }
-
