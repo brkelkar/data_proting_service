@@ -2,6 +2,8 @@ package functions
 
 import (
 	"bufio"
+	"data_porting_service/models"
+	"data_porting_service/utils"
 	"encoding/csv"
 	"encoding/json"
 	"io"
@@ -12,9 +14,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"data_porting_service/models"
-	"data_porting_service/utils"
 
 	cr "github.com/brkelkar/common_utils/configreader"
 	gc "github.com/brkelkar/common_utils/gcsbucketclient"
@@ -102,11 +101,16 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 				case i.cAttr.colMap["BILLNUMBER"]:
 					tempInvoice.BillNumber = strings.TrimSpace(val)
 				case i.cAttr.colMap["BILLDATE"]:
-					tempInvoice.BillDate, _ = utils.ConvertDate(val)
+					if len(val) >= 4 && val != "01-01-0001 00:00:00" {
+						tempInvoice.BillDate, _ = utils.ConvertDate(val)
+					}
 				case i.cAttr.colMap["CHALLANNUMBER"]:
 					tempInvoice.ChallanNumber = strings.TrimSpace(val)
 				case i.cAttr.colMap["CHALLANDATE"]:
-					tempInvoice.ChallanDate, _ = utils.ConvertDate(val)
+					if len(val) >= 4 && val != "01-01-0001 00:00:00" {
+
+						tempInvoice.ChallanDate, _ = utils.ConvertDate(val)
+					}
 				case i.cAttr.colMap["BUYERCODE"]:
 					tempInvoice.BuyerId = val
 				case i.cAttr.colMap["REASON"]:
@@ -124,7 +128,9 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 				case i.cAttr.colMap["BATCH"]:
 					tempInvoice.Batch = val
 				case i.cAttr.colMap["EXPIRY"]:
-					tempInvoice.Expiry, _ = utils.ConvertDate(val)
+					if len(val) >= 4 && val != "01-01-0001 00:00:00" {
+						tempInvoice.Expiry, _ = utils.ConvertDate(val)
+					}
 				case i.cAttr.colMap["QUANTITY"]:
 					tempInvoice.Quantity, _ = strconv.ParseFloat(val, 64)
 				case i.cAttr.colMap["FREEQUANTITY"]:
@@ -168,7 +174,9 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 				case i.cAttr.colMap["BASESCHEMEFREEQUANTITY"]:
 					tempInvoice.BaseSchemeFreeQuantity, _ = strconv.ParseFloat(val, 64)
 				case i.cAttr.colMap["PAYMENTDUEDATE"]:
-					tempInvoice.PaymentDueDate, _ = utils.ConvertDate(val)
+					if len(val) >= 4 && val != "01-01-0001 00:00:00" {
+						tempInvoice.PaymentDueDate, _ = utils.ConvertDate(val)
+					}
 				case i.cAttr.colMap["REMARKS"]:
 					tempInvoice.Remarks = val
 				case i.cAttr.colMap["COMPANYNAME"]:
@@ -176,7 +184,9 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 				case i.cAttr.colMap["NETINVOICEAMOUNT"]:
 					tempInvoice.NetInvoiceAmount, _ = strconv.ParseFloat(val, 64)
 				case i.cAttr.colMap["LASTTRANSACTIONDATE"]:
-					tempInvoice.LastTransactionDate, _ = utils.ConvertDate(val)
+					if len(val) >= 4 && val != "01-01-0001 00:00:00" {
+						tempInvoice.LastTransactionDate, _ = utils.ConvertDate(val)
+					}
 				case i.cAttr.colMap["SGSTAMOUNT"]:
 					tempInvoice.SGSTAmount, _ = strconv.ParseFloat(val, 64)
 				case i.cAttr.colMap["CGSTAMOUNT"]:
@@ -194,7 +204,9 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 				case i.cAttr.colMap["ORDERNUMBER"]:
 					tempInvoice.OrderNumber = val
 				case i.cAttr.colMap["ORDERDATE"]:
-					tempInvoice.OrderDate, _ = utils.ConvertDate(val)
+					if len(val) >= 4 && val != "01-01-0001 00:00:00" {
+						tempInvoice.OrderDate, _ = utils.ConvertDate(val)
+					}
 					// case i.cAttr.colMap["BARCODE"]:
 					// 	tempInvoice.Barcode = val
 				}
