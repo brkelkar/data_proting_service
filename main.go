@@ -72,6 +72,9 @@ func main() {
 			err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 				cm <- msg
 			})
+			if err!=nil{
+				log.Error("Subscription error := ",err)
+			}
 		}(sub)
 	}
 	log.Info("Starting go Message reader")
