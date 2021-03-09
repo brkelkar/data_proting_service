@@ -104,19 +104,19 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	mu.Unlock()
 
 	switch bucketDetails.Bucket {
-	case "awacsstock":
+	case "awacssmartstock":
 		var stockObj functions.StockAttr
 		stockObj.StockCloudFunction(g, cfg)
-	case "awacsinvoice":
+	case "awacssmartinvoice":
 		var invoiceAttr functions.InvoiceAttr
 		invoiceAttr.InvoiceCloudFunction(g, cfg)
-	case "awacscustomermaster":
+	case "awacssmartcustomermaster":
 		var customerMasterAttar functions.CustomerMasterAttar
 		customerMasterAttar.CustomerMasterCloudFunction(g, cfg)
-	case "awacsproductmaster":
+	case "awacssmartproductmaster":
 		var ProductmasterAttar functions.ProductMasterAttar
 		ProductmasterAttar.ProductMasterCloudFunction(g, cfg)
-	case "awacsoutstanding":
+	case "awacssmartoutstanding":
 		var OutstandingAttar functions.OutstandingAttar
 		OutstandingAttar.OutstandingCloudFunction(g, cfg)
 	}
