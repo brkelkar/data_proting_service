@@ -25,8 +25,10 @@ func WriteToSyncService(URLPath string, payloadVal []interface{}, batchSize int)
 			log.Printf("Batch Size Index:=  %v := %v\n", startIndex, updateRecordLastIndex)
 			updateBatch := payloadVal[startIndex:updateRecordLastIndex]
 
-			CallToSyncService(URLPath, updateBatch)
-
+			err = CallToSyncService(URLPath, updateBatch)
+			if err != nil {
+				return err
+			}
 			remainingRecords = remainingRecords - batchSize
 			startIndex = updateRecordLastIndex
 			if remainingRecords < batchSize {
@@ -47,7 +49,7 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 		if err != nil {
 			log.Println(err)
 			log.Printf("Retry: %v\n", i)
-			time.Sleep(10 * time.Second)			
+			time.Sleep(10 * time.Second)
 			continue
 		}
 
@@ -55,12 +57,12 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 			log.Println("Failed to write by Sync service status := " + resp.Status)
 			resp.Body.Close()
 			log.Printf("Retry: %v\n", i)
-			time.Sleep(10 * time.Second)			
+			time.Sleep(10 * time.Second)
 		} else {
 			resp.Body.Close()
 			return nil
 		}
 	}
 
-	return nil
+	return err
 }
