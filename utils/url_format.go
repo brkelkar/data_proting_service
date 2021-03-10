@@ -6,6 +6,6 @@ import (
 
 //GetHostURL return Host URL using config
 func GetHostURL(cfg cr.Config) (URL string) {
-	URL = "http://0.0.0.0:8088"
+	URL = "http://app.awacscloud.tech"
 	return
 }
