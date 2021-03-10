@@ -15,7 +15,6 @@ type Invoice struct {
 	ChallanDate              *time.Time `gorm:"type:datetime;column:ChallanDate"`
 	BuyerId                  string     `gorm:"column:BuyerId"`
 	Reason                   string     `gorm:"column:Reason"`
-	BuyerProductCode         string     `gorm:"column:BuyerProductCode"`
 	UPC                      string     `gorm:"column:UPC"`
 	SupplierProductCode      string     `gorm:"column:SupplierProductCode"`
 	SupplierProductName      string     `gorm:"column:SupplierProductName"`
@@ -48,16 +47,9 @@ type Invoice struct {
 	Remarks                  string     `gorm:"column:Remarks"`
 	CompanyName              string     `gorm:"column:CompanyName"`
 	NetInvoiceAmount         float64    `gorm:"column:NetInvoiceAmount"`
-	NetPurchaseAmount        float64    `gorm:"column:NetPurchaseAmount"`
 	LastTransactionDate      *time.Time `gorm:"type:datetime;column:LastTransactionDate"`
 	ReceivedOn               *time.Time `gorm:"type:datetime;column:ReceivedOn"`
 	BatchId                  *string    `gorm:"type:uniqueidentifier;column:BatchId"`
-	//EmailPrepared            bool       `gorm:"column:EmailPrepared"`
-	//EmailPreparedOn          *time.Time `gorm:"type:datetime;column:EmailPreparedOn"`
-	//Taken              bool       `gorm:"column:Taken"`
-	//TakenOn            *time.Time `gorm:"type:datetime;column:TakenOn"`
-	//LastHostAddress    string     `gorm:"column:LastHostAddress"`
-	WorkspaceId        int64      `gorm:"column:WorkspaceId"`
 	SGSTAmount         float64    `gorm:"column:SGSTAmount"`
 	CGSTAmount         float64    `gorm:"column:CGSTAmount"`
 	IGSTAmount         float64    `gorm:"column:IGSTAmount"`
@@ -67,11 +59,7 @@ type Invoice struct {
 	HSN                string     `gorm:"column:HSN"`
 	OrderNumber        string     `gorm:"column:OrderNumber"`
 	OrderDate          *time.Time `gorm:"type:datetime;column:OrderDate"`
-	//Barcode            string     `gorm:"column:Barcode"`
-	//CreatedDate        *time.Time `gorm:"type:datetime;column:CreatedDate"`
-	//File_Path          string     `gorm:"column:File_Path"`
 	File_Received_Dttm *time.Time `gorm:"type:datetime;column:File_Received_Dttm"`
-	//Inv_File_Id        float64    `gorm:"column:Inv_File_Id"`
 }
 
 
