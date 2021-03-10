@@ -77,6 +77,9 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 		reader = bufio.NewReader(rc)
 	} else {
 		reader = bufio.NewReader(g.GcsClient.GetReader())
+		if reader == nil {
+			return
+		}
 	}
 
 	// Start reading file line by line
@@ -268,6 +271,9 @@ func getReplaceStrings(distributorCode string) (replace []models.ReplaceStrings,
 	}
 
 	rc := csv.NewReader(gClient.GetReader())
+	if rc == nil {
+		return
+	}
 	rc.Comma = ','
 	for {
 		line, err := rc.Read()

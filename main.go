@@ -6,6 +6,7 @@ import (
 	"data_porting_service/models"
 	"data_porting_service/utils"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -72,8 +73,8 @@ func main() {
 			err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 				cm <- msg
 			})
-			if err!=nil{
-				log.Error("Subscription error := ",err)
+			if err != nil {
+				log.Error("Subscription error := ", err)
 			}
 		}(sub)
 	}
@@ -81,8 +82,8 @@ func main() {
 	for msg := range cm {
 		guard <- struct{}{} // would block if guard channel is already filled
 		go func(ctx context.Context, msg pubsub.Message) {
-			log.Info("Calling worker")
 			worker(ctx, msg)
+			fmt.Println(msg)
 			msg.Ack()
 			<-guard
 		}(ctx, *msg)
