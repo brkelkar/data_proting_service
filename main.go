@@ -6,7 +6,6 @@ import (
 	"data_porting_service/models"
 	"data_porting_service/utils"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -83,7 +82,7 @@ func main() {
 		guard <- struct{}{} // would block if guard channel is already filled
 		go func(ctx context.Context, msg pubsub.Message) {
 			worker(ctx, msg)
-			fmt.Println(msg)
+			//fmt.Println(msg)
 			msg.Ack()
 			<-guard
 		}(ctx, *msg)
