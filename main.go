@@ -38,7 +38,7 @@ var (
 func init() {
 	awacsSubNames = []string{"awacsstock-sub", "awacscustomermaster-sub", "awacsoutstanding-sub", "awacsproductmaster-sub", "awacsinvoice-sub"}
 	projectID = "awacs-dev"
-	maxGoroutines = 10
+	maxGoroutines = 5
 	//cfg.ReadGcsFile("gs://awacs_config/cloud_function_config.yml")
 	fiveMB = 5 * 1024 * 1024
 }
@@ -50,7 +50,6 @@ func main() {
 		log.Error("Error while recieving Message: %v", err)
 	}
 	defer client.Close()
-
 	var awacsSubscriptions []*pubsub.Subscription
 
 	for _, name := range awacsSubNames {
@@ -81,8 +80,9 @@ func main() {
 	for msg := range cm {
 		guard <- struct{}{} // would block if guard channel is already filled
 		go func(ctx context.Context, msg pubsub.Message) {
+			time.Sleep(5 * time.Millisecond)
 			worker(ctx, msg)
-			//fmt.Println(msg)
+
 			msg.Ack()
 			<-guard
 		}(ctx, *msg)
@@ -97,6 +97,7 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	e.Name = bucketDetails.Name
 	e.Updated = bucketDetails.Updated
 	e.Size = bucketDetails.Size
+
 	bucketSize, err := strconv.ParseInt(bucketDetails.Size, 10, 64)
 	if err == nil && bucketSize > fiveMB {
 		msg.Ack()
@@ -104,6 +105,12 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	var mu sync.Mutex
 	mu.Lock()
 	g := *gcsFileAttr.HandleGCSEvent(ctx, e)
+	if bucketSize <= 511 {
+		g.GcsClient.MoveObject(g.FileName, g.FileName, "awacsportedinvoice")
+		g.LogFileDetails(true)
+
+		return
+	}
 	mu.Unlock()
 
 	switch bucketDetails.Bucket {

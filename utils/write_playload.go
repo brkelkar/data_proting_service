@@ -49,7 +49,7 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 		if err != nil {
 			log.Println(err)
 			log.Printf("Retry: %v\n", i)
-			time.Sleep(10 * time.Second)
+			time.Sleep(25 * time.Second)
 			continue
 		}
 
@@ -57,7 +57,7 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 			log.Println("Failed to write by Sync service status := " + resp.Status)
 			resp.Body.Close()
 			log.Printf("Retry: %v\n", i)
-			time.Sleep(10 * time.Second)
+			time.Sleep(25 * time.Second)
 		} else {
 			resp.Body.Close()
 			return nil

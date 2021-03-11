@@ -2,6 +2,8 @@ package functions
 
 import (
 	"bufio"
+	"data_porting_service/models"
+	"data_porting_service/utils"
 	"fmt"
 	"io"
 	"log"
@@ -9,9 +11,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"data_porting_service/models"
-	"data_porting_service/utils"
 
 	cr "github.com/brkelkar/common_utils/configreader"
 )
@@ -128,7 +127,7 @@ func (o *OutstandingAttar) OutstandingCloudFunction(g utils.GcsFile, cfg cr.Conf
 
 	recordCount := len(OutstandingPayload)
 	if recordCount > 0 {
-		err = utils.WriteToSyncService(URLPath, OutstandingPayload,20000)
+		err = utils.WriteToSyncService(URLPath, OutstandingPayload, 20000)
 		if err != nil {
 			log.Print(err)
 			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")

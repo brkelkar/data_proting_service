@@ -44,12 +44,16 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 	log.Printf("Starting Invoice file upload for :%v/%v ", g.FilePath, g.FileName)
 	i.initInvoice(cfg)
 	g.FileType = "I"
-	if g.DistributorCode == "MHNK200029" || g.DistributorCode == "MHAD200046" {
+	r := g.GcsClient.GetReader()
+
+	if g.GcsClient.GetLastStatus() == false || r == nil || g.DistributorCode == "MHNK200029" || g.DistributorCode == "MHAD200046" {
 		g.GcsClient.MoveObject(g.FileName, g.FileName, "awacserrorinvoice")
 		log.Println("Porting Error :" + g.FileName)
 		g.LogFileDetails(false)
+
 		return nil
 	}
+
 	fileSplitSlice := strings.Split(g.FileName, "_")
 	spiltLen := len(fileSplitSlice)
 
@@ -68,7 +72,7 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 	//This code will handle these type of files by replaceing \n \r with
 	// "" and then identify new line by distributor code
 	if _, ok := i.multiLinedistributorMap[g.DistributorCode]; ok {
-		data, _ := ioutil.ReadAll(g.GcsClient.GetReader())
+		data, _ := ioutil.ReadAll(r)
 		content := string(data)
 		content = strings.ReplaceAll(content, "\n", "")
 		content = strings.ReplaceAll(content, "\r", "")
@@ -76,7 +80,7 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 		rc := strings.NewReader(content)
 		reader = bufio.NewReader(rc)
 	} else {
-		reader = bufio.NewReader(g.GcsClient.GetReader())
+		reader = bufio.NewReader(r)
 		if reader == nil {
 			return
 		}
@@ -225,7 +229,9 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 			tempInvoice.DeveloperId = i.developerID
 			tempInvoice.File_Received_Dttm = &g.LastUpdateTime
 			tempInvoice.SupplierId = g.DistributorCode
-			Invoice = append(Invoice, tempInvoice)
+			if tempInvoice.BillNumber != "" && tempInvoice.ChallanNumber != "" {
+				Invoice = append(Invoice, tempInvoice)
+			}
 		}
 		flag = 0
 
