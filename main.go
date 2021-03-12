@@ -117,7 +117,7 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	case "awacssmartstock":
 		var stockObj functions.StockAttr
 		stockObj.StockCloudFunction(g, cfg)
-	case "awacssmartinvoice":
+	case "awacsinvoice":
 		var invoiceAttr functions.InvoiceAttr
 		invoiceAttr.InvoiceCloudFunction(g, cfg)
 	case "awacssmartcustomermaster":

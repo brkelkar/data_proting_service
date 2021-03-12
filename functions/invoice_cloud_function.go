@@ -1,6 +1,7 @@
 package functions
 
 import (
+	"fmt"
 	"bufio"
 	"data_porting_service/models"
 	"data_porting_service/utils"
@@ -229,8 +230,10 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 			tempInvoice.DeveloperId = i.developerID
 			tempInvoice.File_Received_Dttm = &g.LastUpdateTime
 			tempInvoice.SupplierId = g.DistributorCode
-			if tempInvoice.BillNumber != "" && tempInvoice.ChallanNumber != "" {
+			if !(len(tempInvoice.BillNumber) == 0 && len(tempInvoice.ChallanNumber) == 0) {
+				
 				Invoice = append(Invoice, tempInvoice)
+
 			}
 		}
 		flag = 0
@@ -242,6 +245,7 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 
 	//Got final record to write
 	recordCount := len(Invoice)
+	fmt.Println(recordCount)
 	if recordCount > 0 {
 		//jsonValue, _ := json.Marshal(Invoice)
 		err := utils.WriteToSyncService(URLPath, Invoice, 15000)
