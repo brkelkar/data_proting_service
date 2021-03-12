@@ -35,10 +35,18 @@ func (s *StockAttr) stockInit(cfg cr.Config) {
 func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err error) {
 	startTime := time.Now()
 	log.Printf("Starting stock file upload for :%v", g.FilePath)
-	g.FileType = "S"
 	s.stockInit(cfg)
+	g.FileType = "S"
+	r := g.GcsClient.GetReader()
+	if g.GcsClient.GetLastStatus() == false {
+		return
+	}
+	
 	var reader *bufio.Reader
-	reader = bufio.NewReader(g.GcsClient.GetReader())
+	reader = bufio.NewReader(r)
+	if reader == nil {
+		return
+	}
 	flag := 1
 	var stock []interface{}
 	productMap := make(map[string]models.Stocks)
@@ -92,7 +100,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	}
 	recordCount := len(stock)
 	if recordCount > 0 {
-		err = utils.WriteToSyncService(URLPath, stock,20000)
+		err = utils.WriteToSyncService(URLPath, stock, 20000)
 		if err != nil {
 
 			log.Print(err)

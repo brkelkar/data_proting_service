@@ -105,19 +105,22 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	var mu sync.Mutex
 	mu.Lock()
 	g := *gcsFileAttr.HandleGCSEvent(ctx, e)
-	if bucketSize <= 511 {
-		g.GcsClient.MoveObject(g.FileName, g.FileName, "awacsportedinvoice")
-		g.LogFileDetails(true)
-
+	if g.GcsClient.GetLastStatus() == false {
 		return
 	}
+
 	mu.Unlock()
 
 	switch bucketDetails.Bucket {
 	case "awacssmartstock":
 		var stockObj functions.StockAttr
 		stockObj.StockCloudFunction(g, cfg)
-	case "awacsinvoice":
+	case "awacssmartinvoice":
+		if bucketSize <= 511 {
+			g.GcsClient.MoveObject(g.FileName, g.FileName, "awacsportedinvoice")
+			g.LogFileDetails(true)
+			return
+		}
 		var invoiceAttr functions.InvoiceAttr
 		invoiceAttr.InvoiceCloudFunction(g, cfg)
 	case "awacssmartcustomermaster":

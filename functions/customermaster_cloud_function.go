@@ -39,8 +39,15 @@ func (o *CustomerMasterAttar) CustomerMasterCloudFunction(g utils.GcsFile, cfg c
 	log.Printf("Starting customer master file upload for :%v/%v ", g.FilePath, g.FileName)
 	o.initCustomerMaster(cfg)
 	g.FileType = "C"
+	r := g.GcsClient.GetReader()
+	if g.GcsClient.GetLastStatus() == false {
+		return
+	}
 	var reader *bufio.Reader
-	reader = bufio.NewReader(g.GcsClient.GetReader())
+	reader = bufio.NewReader(r)
+	if reader == nil {
+		return
+	}
 	flag := 1
 	var Customermaster []interface{}
 	for {
@@ -128,7 +135,7 @@ func (o *CustomerMasterAttar) CustomerMasterCloudFunction(g utils.GcsFile, cfg c
 	recordCount := len(Customermaster)
 	if recordCount > 0 {
 		//jsonValue, _ := json.Marshal(Customermaster)
-		err = utils.WriteToSyncService(URLPath, Customermaster,20000)
+		err = utils.WriteToSyncService(URLPath, Customermaster, 20000)
 		if err != nil {
 			log.Print(err)
 			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")

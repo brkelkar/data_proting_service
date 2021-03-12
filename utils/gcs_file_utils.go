@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"data_porting_service/models"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -35,7 +34,7 @@ func (g *GcsFile) HandleGCSEvent(ctx context.Context, e models.GCSEvent) *GcsFil
 	g.GcsClient = gcsObj.InitClient(ctx).SetBucketName(e.Bucket).SetNewReader(e.Name)
 
 	if !g.GcsClient.GetLastStatus() {
-		log.Print("Error while reading file")
+		//log.Print("Error while reading file")
 	}
 	g.FileSize, _ = strconv.Atoi(e.Size)
 	g.FilePath = e.Bucket + "/" + e.Name
