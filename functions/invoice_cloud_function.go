@@ -41,13 +41,13 @@ func (i *InvoiceAttr) initInvoice(cfg cr.Config) {
 //InvoiceCloudFunction used to load invoice file to database
 func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err error) {
 	startTime := time.Now()
-	log.Printf("Starting Invoice file upload for :%v/%v ", g.FilePath, g.FileName)
+	log.Printf("Starting Invoice file upload for :%v ", g.FilePath)
 	i.initInvoice(cfg)
 	g.FileType = "I"
 	r := g.GcsClient.GetReader()
 
-	if g.GcsClient.GetLastStatus() == false {		
-		return 
+	if g.GcsClient.GetLastStatus() == false {
+		return
 	}
 
 	if g.DistributorCode == "MHNK200029" || g.DistributorCode == "MHAD200046" {

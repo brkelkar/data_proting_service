@@ -42,10 +42,15 @@ func (o *ProductMasterAttar) ProductMasterCloudFunction(g utils.GcsFile, cfg cr.
 	log.Printf("Starting product master file upload for :%v/%v ", g.FilePath, g.FileName)
 	o.initProductMaster(cfg)
 	g.FileType = "P"
-
+	r := g.GcsClient.GetReader()
+	if g.GcsClient.GetLastStatus() == false {
+		return
+	}
 	var reader *bufio.Reader
-	reader = bufio.NewReader(g.GcsClient.GetReader())
-
+	reader = bufio.NewReader(r)
+	if reader == nil {
+		return
+	}
 	flag := 1
 	var Productmaster []interface{}
 
@@ -134,7 +139,7 @@ func (o *ProductMasterAttar) ProductMasterCloudFunction(g utils.GcsFile, cfg cr.
 
 	if recordCount > 0 {
 		//jsonValue, _ := json.Marshal(Productmaster)
-		err = utils.WriteToSyncService(URLPath, Productmaster,20000)
+		err = utils.WriteToSyncService(URLPath, Productmaster, 20000)
 		if err != nil {
 			log.Print(err)
 			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")

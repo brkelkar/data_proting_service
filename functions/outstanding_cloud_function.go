@@ -38,9 +38,15 @@ func (o *OutstandingAttar) OutstandingCloudFunction(g utils.GcsFile, cfg cr.Conf
 	log.Printf("Starting outstanding file upload for :%v/%v ", g.FilePath, g.FileName)
 	o.initOutstanding(cfg)
 	g.FileType = "O"
-
+	r := g.GcsClient.GetReader()
+	if g.GcsClient.GetLastStatus() == false {
+		return
+	}
 	var reader *bufio.Reader
-	reader = bufio.NewReader(g.GcsClient.GetReader())
+	reader = bufio.NewReader(r)
+	if reader == nil {
+		return
+	}
 	flag := 1
 	var Outstanding []models.Outstanding
 	var OutstandingPayload []interface{}
