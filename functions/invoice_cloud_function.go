@@ -1,7 +1,6 @@
 package functions
 
 import (
-	"fmt"
 	"bufio"
 	"data_porting_service/models"
 	"data_porting_service/utils"
