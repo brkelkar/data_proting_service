@@ -249,7 +249,6 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 
 	//Got final record to write
 	recordCount := len(Invoice)
-	fmt.Println(recordCount)
 	if recordCount > 0 {
 		//jsonValue, _ := json.Marshal(Invoice)
 		err := utils.WriteToSyncService(URLPath, Invoice, 15000)
