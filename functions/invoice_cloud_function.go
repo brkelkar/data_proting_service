@@ -46,7 +46,11 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 	g.FileType = "I"
 	r := g.GcsClient.GetReader()
 
-	if g.GcsClient.GetLastStatus() == false || r == nil || g.DistributorCode == "MHNK200029" || g.DistributorCode == "MHAD200046" {
+	if g.GcsClient.GetLastStatus() == false {		
+		return 
+	}
+
+	if g.DistributorCode == "MHNK200029" || g.DistributorCode == "MHAD200046" {
 		g.GcsClient.MoveObject(g.FileName, g.FileName, "awacserrorinvoice")
 		log.Println("Porting Error :" + g.FileName)
 		g.LogFileDetails(false)

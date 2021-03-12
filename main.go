@@ -105,10 +105,13 @@ func worker(ctx context.Context, msg pubsub.Message) {
 	var mu sync.Mutex
 	mu.Lock()
 	g := *gcsFileAttr.HandleGCSEvent(ctx, e)
+	if g.GcsClient.GetLastStatus() == false {		
+		return 
+	}
+
 	if bucketSize <= 511 {
 		g.GcsClient.MoveObject(g.FileName, g.FileName, "awacsportedinvoice")
 		g.LogFileDetails(true)
-
 		return
 	}
 	mu.Unlock()

@@ -55,7 +55,7 @@ func (g *GcsBucketClient) SetNewReader(object string) *GcsBucketClient {
 
 	g.r, err = g.client.Bucket(g.bucketName).Object(object).NewReader(g.ctx)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		g.errorf("failed to get default GCS bucket name: %v", err)
 	} else {
 		g.status = true
