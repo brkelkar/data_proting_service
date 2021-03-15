@@ -13,7 +13,10 @@ import (
 func WriteToSyncService(URLPath string, payloadVal []interface{}, batchSize int) (err error) {
 	totalRecordCount := len(payloadVal)
 	if totalRecordCount <= batchSize {
-		CallToSyncService(URLPath, payloadVal)
+		err=CallToSyncService(URLPath, payloadVal)
+		if err != nil {
+			return err
+		}
 	} else {
 		remainingRecords := totalRecordCount
 		updateRecordLastIndex := batchSize
@@ -47,7 +50,6 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 	payload, _ := json.Marshal(payloadVal)
 	for i := 1; i <= 7; i++ {
 		resp, err := http.Post(URLPath, "application/json", bytes.NewBuffer(payload))
-		log.Println("Calling URL := "+URLPath)
 		log.Println("Calling URL := "+URLPath)
 		if err != nil {
 			log.Println(err)

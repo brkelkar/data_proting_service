@@ -104,7 +104,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 		if err != nil {
 
 			log.Print(err)
-			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "balatestawacs")
+			g.GcsClient.MoveObject(g.FileName, "error_Files/"+g.FileName, "awacs-error-stocks")
 			log.Println("Porting Error :" + g.FileName)
 			g.LogFileDetails(false)
 			return err
@@ -114,7 +114,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	var mu sync.Mutex
 	mu.Lock()
 	// If either of the loading is successful move file to ported
-	g.GcsClient.MoveObject(g.FileName, "ported/"+g.FileName, "balatestawacs")
+	g.GcsClient.MoveObject(g.FileName, "ported/"+g.FileName, "awacs-ported-stocks")
 	log.Println("Porting Done :" + g.FileName)
 	mu.Unlock()
 	g.TimeDiffrence = int64(time.Now().Sub(startTime) / 1000000)
