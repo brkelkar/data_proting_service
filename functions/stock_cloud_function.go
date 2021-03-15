@@ -100,7 +100,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	}
 	recordCount := len(stock)
 	if recordCount > 0 {
-		err = utils.WriteToSyncService(URLPath, stock, 20000)
+		err = utils.WriteToSyncService(URLPath, stock, 60000)
 		if err != nil {
 
 			log.Print(err)
