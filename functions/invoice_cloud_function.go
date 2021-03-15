@@ -40,9 +40,11 @@ func (i *InvoiceAttr) initInvoice(cfg cr.Config) {
 
 //InvoiceCloudFunction used to load invoice file to database
 func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err error) {
+
 	startTime := time.Now()
 	log.Printf("Starting Invoice file upload for :%v ", g.FilePath)
 	i.initInvoice(cfg)
+	URLPath = "http://app.awacscloud.tech/api/invoice"
 	g.FileType = "I"
 	r := g.GcsClient.GetReader()
 

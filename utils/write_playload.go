@@ -47,6 +47,8 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 	payload, _ := json.Marshal(payloadVal)
 	for i := 1; i <= 7; i++ {
 		resp, err := http.Post(URLPath, "application/json", bytes.NewBuffer(payload))
+		log.Println("Calling URL := "+URLPath)
+		log.Println("Calling URL := "+URLPath)
 		if err != nil {
 			log.Println(err)
 			log.Printf("Retry: %v\n", i)
@@ -55,11 +57,12 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 		}
 
 		if resp.Status != "200 OK" {
-			log.Println("Failed to write by Sync service status := " + resp.Status)
+			log.Println("Failed to write by Sync service status := "+ resp.Status+"  path="+URLPath)
 			err= errors.New(resp.Status)
 			resp.Body.Close()
 			log.Printf("Retry: %v\n", i)
 			time.Sleep(25 * time.Second)
+			continue
 		} else {
 			resp.Body.Close()
 			return nil
