@@ -44,7 +44,7 @@ func WriteToSyncService(URLPath string, payloadVal []interface{}, batchSize int)
 //CallToSyncService sends records to syncUpload service
 func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 	payload, _ := json.Marshal(payloadVal)
-	for i := 1; i <= 5; i++ {
+	for i := 1; i <= 7; i++ {
 		resp, err := http.Post(URLPath, "application/json", bytes.NewBuffer(payload))
 		if err != nil {
 			log.Println(err)
