@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"errors"
 )
 
 //WriteToSyncService sends records to syncUpload service
@@ -55,6 +56,7 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 
 		if resp.Status != "200 OK" {
 			log.Println("Failed to write by Sync service status := " + resp.Status)
+			err= errors.New(resp.Status)
 			resp.Body.Close()
 			log.Printf("Retry: %v\n", i)
 			time.Sleep(25 * time.Second)
