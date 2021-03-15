@@ -52,17 +52,15 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 	for i := 1; i <= 7; i++ {
 		resp, err = http.Post(URLPath, "application/json", bytes.NewBuffer(payload))
 		if err != nil {
-			log.Println(err)
-			log.Printf("Retry: %v\n", i)
+			log.Printf("Failed to Connect by Sync service status := %v, Retry %v \n", err, i)
 			time.Sleep(25 * time.Second)
 			continue
 		}
 
 		if resp.Status != "200 OK" {
-			log.Println("Failed to write by Sync service status := "+ resp.Status+"  path="+URLPath)
+			log.Printf("Failed to write by Sync service status := %v, for URI=%v, Retry=%v\n",resp.Status,resp.Request.RequestURI,i)
 			err= errors.New(resp.Status)
 			resp.Body.Close()
-			log.Printf("Retry: %v\n", i)
 			time.Sleep(25 * time.Second)
 			continue
 		} else {
