@@ -58,7 +58,7 @@ func CallToSyncService(URLPath string, payloadVal []interface{}) (err error) {
 		}
 
 		if resp.Status != "200 OK" {
-			log.Printf("Failed to write by Sync service status := %v, for URI=%v, Retry=%v\n",resp.Status,resp.Request.RequestURI,i)
+			log.Printf("Failed to write by Sync service status := %v, for URI=%v, Retry=%v\n",resp.Status,URLPath,i)
 			err= errors.New(resp.Status)
 			resp.Body.Close()
 			time.Sleep(25 * time.Second)
