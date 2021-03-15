@@ -41,7 +41,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	if g.GcsClient.GetLastStatus() == false {
 		return
 	}
-	
+
 	var reader *bufio.Reader
 	reader = bufio.NewReader(r)
 	if reader == nil {
@@ -100,7 +100,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	}
 	recordCount := len(stock)
 	if recordCount > 0 {
-		err = utils.WriteToSyncService(URLPath, stock, 60000)
+		err := utils.WriteToSyncService(URLPath, stock, 60000)
 		if err != nil {
 
 			log.Print(err)
