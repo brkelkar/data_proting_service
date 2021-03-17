@@ -59,4 +59,8 @@ jobs:
          gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA \
          gcr.io/$PROJECT_ID/$IMAGE:latest
     # Push the Docker image to Google Container Registry
-    
+    - name: Deploy
+      run: |-
+         gcloud container clusters get-credentials one-click --region asia-south1-a --project awacs-dev
+         kubectl rollout restart deployments data-port -n awacs-dev
+         echo "Deployment completes in 5 mins"
