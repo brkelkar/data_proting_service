@@ -44,11 +44,10 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 	startTime := time.Now()
 	log.Printf("Starting Invoice file upload for :%v ", g.FilePath)
 	i.initInvoice(cfg)
-	URLPath = "http://app.awacscloud.tech/api/invoice"
 	g.FileType = "I"
 	r := g.GcsClient.GetReader()
 
-	if g.GcsClient.GetLastStatus() == false {
+	if !g.GcsClient.GetLastStatus() {
 		return
 	}
 
@@ -236,7 +235,7 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 			tempInvoice.File_Received_Dttm = &g.LastUpdateTime
 			tempInvoice.SupplierId = g.DistributorCode
 			if !(len(tempInvoice.BillNumber) == 0 && len(tempInvoice.ChallanNumber) == 0) {
-				
+
 				Invoice = append(Invoice, tempInvoice)
 
 			}
@@ -267,7 +266,7 @@ func (i *InvoiceAttr) InvoiceCloudFunction(g utils.GcsFile, cfg cr.Config) (err 
 	g.GcsClient.MoveObject(g.FileName, g.FileName, "awacsportedinvoice")
 	log.Println("Porting Done :" + g.FileName)
 	mu.Unlock()
-	g.TimeDiffrence = int64(time.Now().Sub(startTime) / 1000000)
+	g.TimeDiffrence = int64(time.Since(startTime) / 1000000)
 	g.Records = recordCount
 	g.LogFileDetails(true)
 	return nil

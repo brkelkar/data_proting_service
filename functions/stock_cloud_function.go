@@ -38,12 +38,11 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	s.stockInit(cfg)
 	g.FileType = "S"
 	r := g.GcsClient.GetReader()
-	if g.GcsClient.GetLastStatus() == false {
+	if !g.GcsClient.GetLastStatus() {
 		return
 	}
 
-	var reader *bufio.Reader
-	reader = bufio.NewReader(r)
+	reader := bufio.NewReader(r)
 	if reader == nil {
 		return
 	}
@@ -81,7 +80,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 
 		if flag == 0 {
 			val, ok := productMap[strproductCode]
-			if ok == true {
+			if ok {
 				val.Closing = val.Closing + tempStock.Closing
 				productMap[strproductCode] = val
 			} else {
@@ -117,7 +116,7 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	g.GcsClient.MoveObject(g.FileName, "ported/"+g.FileName, "awacs-ported-stocks")
 	log.Println("Porting Done :" + g.FileName)
 	mu.Unlock()
-	g.TimeDiffrence = int64(time.Now().Sub(startTime) / 1000000)
+	g.TimeDiffrence = int64(time.Since(startTime) / 1000000)
 	g.Records = recordCount
 	g.LogFileDetails(true)
 

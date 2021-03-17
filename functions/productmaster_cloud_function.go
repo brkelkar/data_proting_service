@@ -2,15 +2,14 @@ package functions
 
 import (
 	"bufio"
+	"data_porting_service/models"
+	"data_porting_service/utils"
 	"io"
 	"log"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-
-	"data_porting_service/models"
-	"data_porting_service/utils"
 
 	cr "github.com/brkelkar/common_utils/configreader"
 )
@@ -43,11 +42,10 @@ func (o *ProductMasterAttar) ProductMasterCloudFunction(g utils.GcsFile, cfg cr.
 	o.initProductMaster(cfg)
 	g.FileType = "P"
 	r := g.GcsClient.GetReader()
-	if g.GcsClient.GetLastStatus() == false {
+	if !g.GcsClient.GetLastStatus() {
 		return
 	}
-	var reader *bufio.Reader
-	reader = bufio.NewReader(r)
+	reader := bufio.NewReader(r)
 	if reader == nil {
 		return
 	}
@@ -153,7 +151,7 @@ func (o *ProductMasterAttar) ProductMasterCloudFunction(g utils.GcsFile, cfg cr.
 	// If either of the loading is successful move file to ported
 	g.GcsClient.MoveObject(g.FileName, "ported/productmaster/"+g.FileName, "balatestawacs")
 	log.Println("Porting Done :" + g.FileName)
-	g.TimeDiffrence = int64(time.Now().Sub(startTime) / 1000000)
+	g.TimeDiffrence = int64(time.Since(startTime) / 1000000)
 	mu.Unlock()
 	g.Records = recordCount
 	g.LogFileDetails(true)
