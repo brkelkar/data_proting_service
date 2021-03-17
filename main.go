@@ -38,8 +38,15 @@ var (
 func init() {
 	awacsSubNames = []string{"awacsstock-sub", "awacscustomermaster-sub", "awacsoutstanding-sub", "awacsproductmaster-sub", "awacsinvoice-sub"}
 	projectID = "awacs-dev"
-	maxGoroutines =15
+	maxGoroutines = 15
+	envVerables := []string{"SERVER_PORT", "SERVER_HOST", "AWACS_DB", "AWACS_SMART_DB", "AWACS_SMART_STOCKIST_DB",
+		"DB_PORT", "DB_HOST", "DB_USERNAME", "DB_PASSWORD"}
 	cfg.ReadGcsFile("gs://awacs_config/cloud_function_config.yml")
+	m := cfg.ReadEnv(envVerables)
+
+	//Over write config file variables if enviroment variable is set
+	cfg.MapEnv(m)
+
 	fiveMB = 5 * 1024 * 1024
 }
 
