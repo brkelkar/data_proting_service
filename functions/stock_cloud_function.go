@@ -95,7 +95,9 @@ func (s *StockAttr) StockCloudFunction(g utils.GcsFile, cfg cr.Config) (err erro
 	}
 
 	for _, val := range productMap {
-		stock = append(stock, val)
+		if len(val.UserId) > 0 {
+			stock = append(stock, val)
+		}
 	}
 	recordCount := len(stock)
 	if recordCount > 0 {
